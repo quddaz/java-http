@@ -3,7 +3,6 @@ package org.qupring;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.List;
-import java.util.Map;
 import org.apache.http.HttpMethod;
 import org.junit.jupiter.api.Test;
 import org.qupring.annotation.Route;
@@ -22,7 +21,7 @@ public class HandlerMappingTest {
         );
 
         // when
-        handlerMapping.addMappings(Map.of(), List.of(TestController.class));
+        handlerMapping.addMappings(List.of(TestController.class));
 
         // then
         assertThat(mappingTargets.size()).isEqualTo(1);

@@ -1,4 +1,4 @@
-package org.qupring.mvc.resolver;
+package org.qupring.mvc.argument;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.RecordComponent;

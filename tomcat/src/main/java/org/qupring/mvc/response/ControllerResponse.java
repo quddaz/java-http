@@ -1,4 +1,4 @@
-package org.qupring.mvc.runner;
+package org.qupring.mvc.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,6 +39,14 @@ public final class ControllerResponse {
         return new ControllerResponse(status, Map.of(), null);
     }
 
+    private static void validateStatus(int status) {
+        if (status < 100 || status > 599) {
+            throw new IllegalArgumentException(
+                    "잘못된 HTTP 상태 코드입니다: " + status
+            );
+        }
+    }
+
     public ControllerResponse header(String name, String value) {
         Map<String, String> newHeaders = new LinkedHashMap<>(headers);
         newHeaders.put(name, value);
@@ -60,14 +68,6 @@ public final class ControllerResponse {
 
     public Object getBody() {
         return body;
-    }
-
-    private static void validateStatus(int status) {
-        if (status < 100 || status > 599) {
-            throw new IllegalArgumentException(
-                    "잘못된 HTTP 상태 코드입니다: " + status
-            );
-        }
     }
 
 }

@@ -9,7 +9,7 @@ import org.apache.http.response.HttpTomcatResponse;
 public class ReflectionTest {
     public static void main(String[] args) {
         try {
-            Class<?> clazz = Class.forName("org.qupring.mvc.LoginController");
+            Class<?> clazz = Class.forName("com.techcourse.controller.LoginController");
             Method method = findLoginMethod(clazz);
 
             HttpTomcatRequest request = createRequest();

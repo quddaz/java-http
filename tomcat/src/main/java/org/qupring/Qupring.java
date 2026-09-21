@@ -4,7 +4,7 @@ import java.util.List;
 import org.apache.catalina.startup.Tomcat;
 import org.qupring.annotation.QupringApplication;
 import org.qupring.mvc.ApplicationScanner;
-import org.qupring.mvc.LoginController;
+import com.techcourse.controller.LoginController;
 import org.qupring.mvc.QupringMvc;
 import org.qupring.mvc.handler.HandlerMapping;
 
@@ -14,12 +14,12 @@ public class Qupring {
 
         ApplicationScanner applicationScanner = new ApplicationScanner();
         HandlerMapping handlerMapping = new HandlerMapping();
-        handlerMapping.addMappings(
-                applicationScanner.scanForResources(),
-                List.of(LoginController.class)
-        );
+        handlerMapping.addMappings(List.of(LoginController.class));
 
-        QupringMvc qupringMvc = new QupringMvc(handlerMapping);
+        QupringMvc qupringMvc = new QupringMvc(
+                handlerMapping,
+                applicationScanner.scanForResources()
+        );
 
         final var tomcat = new Tomcat(qupringMvc);
         tomcat.start();

@@ -9,23 +9,12 @@ import org.qupring.annotation.Route;
 
 public class HandlerMapping {
 
-    private final Map<MappingTarget, HandlerTarget> mappings = new HashMap<>();
+    private final Map<MappingTarget, Method> mappings = new HashMap<>();
 
     public void addMappings(
-            Map<String, String> resourceMappings,
             List<Class<?>> controllerClasses
     ) {
-        addResourceMappings(resourceMappings);
         addControllerMappings(controllerClasses);
-    }
-
-    private void addResourceMappings(Map<String, String> resourceMappings) {
-        resourceMappings.forEach((path, resourcePath) ->
-                mappings.put(
-                        new MappingTarget(path, HttpMethod.GET),
-                        HandlerTarget.staticResource(resourcePath)
-                )
-        );
     }
 
     private void addControllerMappings(List<Class<?>> classes) {
@@ -37,13 +26,13 @@ public class HandlerMapping {
                 }
                 mappings.put(
                         new MappingTarget(route.path(), route.method()),
-                        HandlerTarget.controller(method)
+                        method
                 );
             }
         }
     }
 
-    public HandlerTarget getHandler(String path, HttpMethod method) {
+    public Method getHandler(String path, HttpMethod method) {
         return mappings.get(new MappingTarget(path, method));
     }
 

@@ -1,4 +1,4 @@
-package org.qupring.mvc.resolver;
+package org.qupring.mvc.argument;
 
 final class ArgumentConverter {
 

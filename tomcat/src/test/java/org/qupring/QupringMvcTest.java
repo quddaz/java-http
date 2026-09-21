@@ -27,7 +27,7 @@ class QupringMvcTest {
     @BeforeEach
     void setUp() {
         handlerMapping = new HandlerMapping();
-        qupringMvc = new QupringMvc(handlerMapping);
+        qupringMvc = new QupringMvc(handlerMapping, Map.of());
     }
 
     @Test
@@ -47,9 +47,9 @@ class QupringMvcTest {
     @Test
     void 매핑된_정적_리소스를_응답한다() {
         // given
-        handlerMapping.addMappings(
-                Map.of("/login", "static/login.html"),
-                List.of()
+        qupringMvc = new QupringMvc(
+                handlerMapping,
+                Map.of("/login", "static/login.html")
         );
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
 
@@ -67,9 +67,10 @@ class QupringMvcTest {
     @Test
     void 컨트롤러를_정적_리소스보다_먼저_실행한다() {
         // given
-        handlerMapping.addMappings(
-                Map.of("/test", "static/login.html"),
-                List.of(TestController.class)
+        handlerMapping.addMappings(List.of(TestController.class));
+        qupringMvc = new QupringMvc(
+                handlerMapping,
+                Map.of("/test", "static/login.html")
         );
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
 
@@ -99,7 +100,7 @@ class QupringMvcTest {
     @Test
     void 컨트롤러_메서드의_요청_인자를_해결한다() {
         // given
-        handlerMapping.addMappings(Map.of(), List.of(TestController.class));
+        handlerMapping.addMappings(List.of(TestController.class));
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
         HttpRequest request = request(
                 "/arguments",

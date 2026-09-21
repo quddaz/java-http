@@ -26,12 +26,12 @@ class Http11ProcessorTest {
     void setup() {
         ApplicationScanner applicationScanner = new ApplicationScanner();
         HandlerMapping handlerMapping = new HandlerMapping();
-        handlerMapping.addMappings(
-                applicationScanner.scanForResources(),
-                List.of()
-        );
+        handlerMapping.addMappings(List.of());
 
-        qupringMvc = new QupringMvc(handlerMapping);
+        qupringMvc = new QupringMvc(
+                handlerMapping,
+                applicationScanner.scanForResources()
+        );
 
     }
 

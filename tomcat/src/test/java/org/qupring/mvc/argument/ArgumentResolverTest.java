@@ -1,4 +1,4 @@
-package org.qupring.mvc.resolver;
+package org.qupring.mvc.argument;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

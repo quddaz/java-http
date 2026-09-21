@@ -2,6 +2,7 @@ package org.qupring.mvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.LoginController;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.HttpMethod;
@@ -11,19 +12,16 @@ import org.apache.http.response.HttpTomcatResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.qupring.mvc.handler.HandlerMapping;
-import org.qupring.mvc.handler.HandlerTarget;
-import org.qupring.mvc.runner.ArgumentController;
 
 class LoginControllerTest {
 
-    private ArgumentController argumentController;
-    private HandlerMapping handlerMapping;
+    private QupringMvc qupringMvc;
 
     @BeforeEach
     void setUp() {
-        handlerMapping = new HandlerMapping();
-        handlerMapping.addMappings(Map.of(), List.of(LoginController.class));
-        argumentController = new ArgumentController();
+        HandlerMapping handlerMapping = new HandlerMapping();
+        handlerMapping.addMappings(List.of(LoginController.class));
+        qupringMvc = new QupringMvc(handlerMapping, Map.of());
     }
 
     @Test
@@ -36,8 +34,7 @@ class LoginControllerTest {
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
 
         // when
-        HandlerTarget handler = handlerMapping.getHandler("/login", HttpMethod.POST);
-        argumentController.execute(request, response, handler);
+        qupringMvc.run(request, response);
 
         // then
         assertThat(response.getStatus()).isEqualTo(302);
@@ -56,8 +53,7 @@ class LoginControllerTest {
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
 
         // when
-        HandlerTarget handler = handlerMapping.getHandler("/login", HttpMethod.POST);
-        argumentController.execute(request, response, handler);
+        qupringMvc.run(request, response);
 
         // then
         assertThat(response.getStatus()).isEqualTo(302);

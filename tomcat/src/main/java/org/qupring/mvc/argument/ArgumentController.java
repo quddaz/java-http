@@ -1,16 +1,10 @@
-package org.qupring.mvc.runner;
+package org.qupring.mvc.argument;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
-import org.qupring.mvc.handler.HandlerTarget;
-import org.qupring.mvc.resolver.ArgumentResolver;
-import org.qupring.mvc.resolver.HandlerType;
-import org.qupring.mvc.resolver.RequestBodyResolver;
-import org.qupring.mvc.resolver.RequestParamResolver;
-import org.qupring.mvc.resolver.RequestPathResolver;
 
 public class ArgumentController {
 
@@ -27,14 +21,13 @@ public class ArgumentController {
     public Object execute(
             HttpRequest request,
             HttpResponse response,
-            HandlerTarget handler
+            Method method
     ) {
-        if (handler == null || handler.handlerType() != HandlerType.CONTROLLER) {
-            return false;
+        if (method == null) {
+            throw new IllegalArgumentException("실행할 컨트롤러 메소드가 없습니다.");
         }
 
         try {
-            Method method = handler.controllerMethod();
             Object controller = method
                     .getDeclaringClass()
                     .getDeclaredConstructor()
