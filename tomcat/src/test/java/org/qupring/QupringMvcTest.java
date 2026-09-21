@@ -11,6 +11,9 @@ import org.apache.http.response.HttpResponse;
 import org.apache.http.response.HttpTomcatResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.qupring.annotation.RequestBody;
+import org.qupring.annotation.RequestParam;
+import org.qupring.annotation.RequestPath;
 import org.qupring.annotation.Route;
 import org.qupring.file.HtmlReader;
 import org.qupring.mvc.QupringMvc;
@@ -44,8 +47,9 @@ class QupringMvcTest {
     @Test
     void 매핑된_정적_리소스를_응답한다() {
         // given
-        handlerMapping.addResourceMappings(
-                Map.of("/login", "static/login.html")
+        handlerMapping.addMappings(
+                Map.of("/login", "static/login.html"),
+                List.of()
         );
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
 
@@ -63,9 +67,9 @@ class QupringMvcTest {
     @Test
     void 컨트롤러를_정적_리소스보다_먼저_실행한다() {
         // given
-        handlerMapping.addControllerMappings(List.of(TestController.class));
-        handlerMapping.addResourceMappings(
-                Map.of("/test", "static/login.html")
+        handlerMapping.addMappings(
+                Map.of("/test", "static/login.html"),
+                List.of(TestController.class)
         );
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
 
@@ -92,16 +96,44 @@ class QupringMvcTest {
                 .isEqualTo("text/html;charset=utf-8");
     }
 
+    @Test
+    void 컨트롤러_메서드의_요청_인자를_해결한다() {
+        // given
+        handlerMapping.addMappings(Map.of(), List.of(TestController.class));
+        HttpTomcatResponse response = HttpTomcatResponse.createDefault();
+        HttpRequest request = request(
+                "/arguments",
+                HttpMethod.POST,
+                Map.of("page", "2"),
+                Map.of("name", "gugu")
+        );
+
+        // when
+        qupringMvc.run(request, response);
+
+        // then
+        assertThat(response.getBody()).isEqualTo("/arguments:2:gugu");
+    }
+
     private HttpRequest request(String path, HttpMethod method) {
+        return request(path, method, Map.of(), Map.of());
+    }
+
+    private HttpRequest request(
+            String path,
+            HttpMethod method,
+            Map<String, String> queryParameters,
+            Map<String, String> body
+    ) {
         return new HttpTomcatRequest(
                 method,
                 path,
                 "HTTP/1.1",
                 null,
                 Map.of(),
+                queryParameters,
                 Map.of(),
-                Map.of(),
-                Map.of()
+                body
         );
     }
 
@@ -111,5 +143,18 @@ class QupringMvcTest {
         public void test(HttpRequest request, HttpResponse response) {
             response.setBody("controller response");
         }
+
+        @Route(path = "/arguments", method = HttpMethod.POST)
+        public void arguments(
+                @RequestPath String path,
+                @RequestParam("page") int page,
+                @RequestBody UserRequest userRequest,
+                HttpResponse response
+        ) {
+            response.setBody(path + ":" + page + ":" + userRequest.name());
+        }
+    }
+
+    private record UserRequest(String name) {
     }
 }

@@ -14,9 +14,10 @@ public class Qupring {
 
         ApplicationScanner applicationScanner = new ApplicationScanner();
         HandlerMapping handlerMapping = new HandlerMapping();
-        handlerMapping.addResourceMappings(applicationScanner.scanForResources());
-
-        handlerMapping.addControllerMappings(List.of(LoginController.class));
+        handlerMapping.addMappings(
+                applicationScanner.scanForResources(),
+                List.of(LoginController.class)
+        );
 
         QupringMvc qupringMvc = new QupringMvc(handlerMapping);
 

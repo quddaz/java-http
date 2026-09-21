@@ -5,8 +5,12 @@ import com.techcourse.model.User;
 import org.apache.http.HttpMethod;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
+import org.qupring.annotation.RequestBody;
 import org.qupring.annotation.Route;
 import org.qupring.file.HtmlReader;
+import org.qupring.mvc.dto.LoginRequest;
+import org.qupring.mvc.dto.RegisterRequest;
+import org.qupring.mvc.runner.ControllerResponse;
 import org.qupring.session.Session;
 import org.qupring.session.SessionManager;
 
@@ -23,66 +27,67 @@ public class LoginController {
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     @Route(path = "/login", method = HttpMethod.GET)
-    public void loginPage(
+    public ControllerResponse loginPage(
             HttpRequest request,
             HttpResponse response
     ) {
         if (isLoggedIn(request)) {
-            redirect(response, LOGIN_SUCCESS_PATH);
-            return;
+            return ControllerResponse.status(FOUND)
+                    .header("Location", LOGIN_SUCCESS_PATH)
+                    .body("");
         }
 
-        response.setBody(
-                HtmlReader.read("static/login.html")
-        );
-        response.setHeader(
-                "Content-Type",
-                HTML_CONTENT_TYPE
-        );
+        return ControllerResponse.ok()
+                .header("Content-Type", HTML_CONTENT_TYPE)
+                .body(HtmlReader.read("static/login.html"));
     }
 
     @Route(path = "/login", method = HttpMethod.POST)
-    public void login(
+    public ControllerResponse login(
             HttpRequest request,
-            HttpResponse response
+            HttpResponse response,
+            @RequestBody LoginRequest loginRequest
     ) {
         if (isLoggedIn(request)) {
-            redirect(response, LOGIN_SUCCESS_PATH);
-            return;
+            return ControllerResponse.status(FOUND)
+                    .header("Location", LOGIN_SUCCESS_PATH)
+                    .body("");
         }
 
-        String account = request.getBody("account");
-        String password = request.getBody("password");
-
-        User user = InMemoryUserRepository.findByAccount(account)
+        User user = InMemoryUserRepository.findByAccount(loginRequest.account())
                 .filter(foundUser ->
-                        foundUser.checkPassword(password))
+                        foundUser.checkPassword(loginRequest.password()))
                 .orElse(null);
 
         if (user == null) {
-            redirect(response, LOGIN_FAILURE_PATH);
-            return;
+            return ControllerResponse.status(FOUND)
+                    .header("Location", LOGIN_FAILURE_PATH)
+                    .body("");
         }
 
-        Session session = SessionManager.createSession(request, user);
-        response.setCookie(SESSION_COOKIE_NAME + "=" + session.getId());
-        redirect(response, LOGIN_SUCCESS_PATH);
+        Session session = createSession(request, user);
+        return ControllerResponse.status(FOUND)
+                .header("Location", LOGIN_SUCCESS_PATH)
+                .header("Set-Cookie", SESSION_COOKIE_NAME + "=" + session.getId())
+                .body("");
     }
 
     @Route(path = "/register", method = HttpMethod.POST)
-    public void register(
-            HttpRequest request,
-            HttpResponse response
+    public ControllerResponse register(
+            HttpResponse response,
+            @RequestBody RegisterRequest registerRequest
     ) {
-        String account = request.getBody("account");
-        String password = request.getBody("password");
-        String email = request.getBody("email");
-
         InMemoryUserRepository.save(
-                new User(null, account, password, email)
+                new User(
+                        registerRequest.account(),
+                        registerRequest.password(),
+                        registerRequest.email()
+                )
         );
 
-        redirect(response, LOGIN_SUCCESS_PATH);
+        return ControllerResponse.status(FOUND)
+                .header("Location", "/login.html")
+                .body("");
     }
 
     private boolean isLoggedIn(HttpRequest request) {

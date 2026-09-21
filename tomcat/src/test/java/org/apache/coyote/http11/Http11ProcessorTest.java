@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,7 +26,10 @@ class Http11ProcessorTest {
     void setup() {
         ApplicationScanner applicationScanner = new ApplicationScanner();
         HandlerMapping handlerMapping = new HandlerMapping();
-        handlerMapping.addResourceMappings(applicationScanner.scanForResources());
+        handlerMapping.addMappings(
+                applicationScanner.scanForResources(),
+                List.of()
+        );
 
         qupringMvc = new QupringMvc(handlerMapping);
 

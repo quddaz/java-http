@@ -9,32 +9,42 @@ import org.qupring.annotation.Route;
 
 public class HandlerMapping {
 
-    private final Map<MappingTarget, Method> controllerMappings = new HashMap<>();
-    private final Map<String, String> resourcesMappings = new HashMap<>();
+    private final Map<MappingTarget, HandlerTarget> mappings = new HashMap<>();
 
-    public void addResourceMappings(Map<String, String> mappings) {
-        resourcesMappings.putAll(mappings);
+    public void addMappings(
+            Map<String, String> resourceMappings,
+            List<Class<?>> controllerClasses
+    ) {
+        addResourceMappings(resourceMappings);
+        addControllerMappings(controllerClasses);
     }
 
-    public String getResource(String path) {
-        return resourcesMappings.get(path);
+    private void addResourceMappings(Map<String, String> resourceMappings) {
+        resourceMappings.forEach((path, resourcePath) ->
+                mappings.put(
+                        new MappingTarget(path, HttpMethod.GET),
+                        HandlerTarget.staticResource(resourcePath)
+                )
+        );
     }
 
-    public void addControllerMappings(List<Class<?>> classes) {
+    private void addControllerMappings(List<Class<?>> classes) {
         for (Class<?> clazz : classes) {
             for (Method method : clazz.getDeclaredMethods()) {
                 Route route = method.getAnnotation(Route.class);
-                if(route == null){
+                if (route == null) {
                     continue;
                 }
-                controllerMappings.put(new MappingTarget(route.path(), route.method()), method);
+                mappings.put(
+                        new MappingTarget(route.path(), route.method()),
+                        HandlerTarget.controller(method)
+                );
             }
         }
     }
 
-    public Method getControllerMethod(String path, HttpMethod method) {
-        return controllerMappings.get(new MappingTarget(path, method));
+    public HandlerTarget getHandler(String path, HttpMethod method) {
+        return mappings.get(new MappingTarget(path, method));
     }
-
 
 }
